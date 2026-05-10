@@ -1,0 +1,132 @@
+# aquatic_ws configuration
+#
+# Running behind a reverse proxy is supported, but IPv4 peer requests have
+# to be proxied to IPv4 requests, and IPv6 requests to IPv6 requests.
+
+# Number of socket workers.
+#
+# On servers with 1-7 physical cores, using a worker per core is
+# recommended. With more cores, using two workers less than the
+# number of cores is recommended.
+#
+# Socket workers receive requests from the socket, parse them and send
+# them on to the swarm workers. They then receive responses from the
+# swarm workers, encode them and send them back over the socket.
+socket_workers = 1
+# Number of swarm workers.
+#
+# A single worker is recommended for servers with 1-7 physical cores.
+# With more cores, using two workers is recommended.
+#
+# Swarm workers receive a number of requests from socket workers,
+# generate responses and send them back to the socket workers.
+swarm_workers = 1
+# Log level. Available values are off, error, warn, info, debug and trace.
+log_level = "warn"
+
+[network]
+# Bind to this address
+#
+# When providing an IPv4 style address, only IPv4 traffic will be
+# handled. Examples:
+# - \"0.0.0.0:3000\" binds to port 3000 on all network interfaces
+# - \"127.0.0.1:3000\" binds to port 3000 on the loopback interface
+#   (localhost)
+#
+# When it comes to IPv6-style addresses, behaviour is more complex and
+# differs between operating systems. On Linux, to accept both IPv4 and
+# IPv6 traffic on any interface, use \"[::]:3000\". Set the \"only_ipv6\"
+# flag below to limit traffic to IPv6. To bind to the loopback interface
+# and only accept IPv6 packets, use \"[::1]:3000\" and set the only_ipv6
+# flag. Receiving both IPv4 and IPv6 traffic on loopback is currently
+# not supported. For other operating systems, please refer to their
+# respective documentation.
+address = "0.0.0.0:3000"
+# Only allow access over IPv6
+only_ipv6 = false
+# Maximum number of pending TCP connections
+tcp_backlog = 1024
+# Enable TLS
+#
+# The TLS files are read on start and when the program receives `SIGUSR1`.
+# If initial parsing fails, the program exits. Later failures result in
+# in emitting of an error-level log message, while successful updates
+# result in emitting of an info-level log message. Updates only affect
+# new connections.
+enable_tls = false
+# Path to TLS certificate (DER-encoded X.509)
+tls_certificate_path = ""
+# Path to TLS private key (DER-encoded ASN.1 in PKCS#8 or PKCS#1 format)
+tls_private_key_path = ""
+websocket_max_message_size = 65536
+websocket_max_frame_size = 16384
+websocket_write_buffer_size = 8192
+# Return a HTTP 200 Ok response when receiving GET /health. Can not be
+# combined with enable_tls.
+enable_http_health_checks = false
+
+[protocol]
+# Maximum number of torrents to accept in scrape request
+max_scrape_torrents = 255
+# Maximum number of offers to accept in announce request
+max_offers = 10
+# Ask peers to announce this often (seconds)
+peer_announce_interval = 120
+
+[cleaning]
+# Clean peers this often (seconds)
+torrent_cleaning_interval = 30
+# Remove peers that have not announced for this long (seconds)
+max_peer_age = 180
+# Require that offers are answered to withing this period (seconds)
+max_offer_age = 120
+connection_cleaning_interval = 30
+# Close connections if no responses have been sent to them for this long (seconds)
+max_connection_idle = 180
+# After updating TLS certificates, close connections running with
+# previous certificates after this long (seconds)
+#
+# Countdown starts at next connection cleaning.
+close_after_tls_update_grace_period = 216000
+
+[privileges]
+# Chroot and switch group and user after binding to sockets
+drop_privileges = false
+# Chroot to this path
+chroot_path = "."
+# Group to switch to after chrooting
+group = "nogroup"
+# User to switch to after chrooting
+user = "nobody"
+
+# Access list configuration
+#
+# The file is read on start and when the program receives `SIGUSR1`. If
+# initial parsing fails, the program exits. Later failures result in in
+# emitting of an error-level log message, while successful updates of the
+# access list result in emitting of an info-level log message.
+[access_list]
+# Access list mode. Available modes are allow, deny and off.
+mode = "off"
+# Path to access list file consisting of newline-separated hex-encoded info hashes.
+#
+# If using chroot mode, path must be relative to new root.
+path = "./access-list.txt"
+
+[metrics]
+# Run a prometheus endpoint
+run_prometheus_endpoint = false
+# Address to run prometheus endpoint on
+prometheus_endpoint_address = "0.0.0.0:9000"
+# Update metrics for torrent count this often (seconds)
+torrent_count_update_interval = 10
+# Serve information on peer clients
+#
+# Expect a certain CPU hit
+peer_clients = false
+# Serve information on all peer id prefixes
+#
+# Requires `peer_clients` to be activated.
+#
+# Expect a certain CPU hit
+peer_id_prefixes = false

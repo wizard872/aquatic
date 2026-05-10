@@ -1,0 +1,127 @@
+# aquatic_http configuration
+
+# Number of socket worker. One per physical core is recommended.
+#
+# Socket workers receive requests from the socket, parse them and send
+# them on to the swarm workers. They then receive responses from the
+# swarm workers, encode them and send them back over the socket.
+socket_workers = 1
+# Number of swarm workers. One is enough in almost all cases
+#
+# Swarm workers receive a number of requests from socket workers,
+# generate responses and send them back to the socket workers.
+swarm_workers = 1
+# Log level. Available values are off, error, warn, info, debug and trace.
+log_level = "warn"
+
+[network]
+# Use IPv4
+use_ipv4 = true
+# Use IPv6
+use_ipv6 = true
+# IPv4 address and port
+#
+# Examples:
+# - Use 0.0.0.0:3000 to bind to all interfaces on port 3000
+# - Use 127.0.0.1:3000 to bind to the loopback interface (localhost) on
+#   port 3000
+address_ipv4 = "0.0.0.0:3000"
+# IPv6 address and port
+#
+# Examples:
+# - Use [::]:3000 to bind to all interfaces on port 3000
+# - Use [::1]:3000 to bind to the loopback interface (localhost) on
+#   port 3000
+address_ipv6 = "[::]:3000"
+# Maximum number of pending TCP connections
+tcp_backlog = 1024
+# Enable TLS
+#
+# The TLS files are read on start and when the program receives `SIGUSR1`.
+# If initial parsing fails, the program exits. Later failures result in
+# in emitting of an error-level log message, while successful updates
+# result in emitting of an info-level log message. Updates only affect
+# new connections.
+enable_tls = false
+# Path to TLS certificate (DER-encoded X.509)
+tls_certificate_path = ""
+# Path to TLS private key (DER-encoded ASN.1 in PKCS#8 or PKCS#1 format)
+tls_private_key_path = ""
+# Keep connections alive after sending a response
+keep_alive = true
+# Does tracker run behind reverse proxy?
+#
+# MUST be set to false if not running behind reverse proxy.
+#
+# If set to true, make sure that reverse_proxy_ip_header_name and
+# reverse_proxy_ip_header_format are set to match your reverse proxy
+# setup.
+#
+# More info on what can go wrong when running behind reverse proxies:
+# https://adam-p.ca/blog/2022/03/x-forwarded-for/
+runs_behind_reverse_proxy = false
+# Name of header set by reverse proxy to indicate peer ip
+reverse_proxy_ip_header_name = "X-Forwarded-For"
+# How to extract peer IP from header field
+#
+# Options:
+# - last_address: use the last address in the last instance of the
+#   header. Works with typical multi-IP setups (e.g., \"X-Forwarded-For\")
+#   as well as for single-IP setups (e.g., nginx \"X-Real-IP\")
+reverse_proxy_ip_header_format = "last_address"
+# Set flag on IPv6 socket to only accept IPv6 traffic.
+#
+# This should typically be set to true unless your OS does not support
+# double-stack sockets (that is, sockets that receive both IPv4 and IPv6
+# packets).
+set_only_ipv6 = true
+
+[protocol]
+# Maximum number of torrents to accept in scrape request
+max_scrape_torrents = 100
+# Maximum number of requested peers to accept in announce request
+max_peers = 50
+# Ask peers to announce this often (seconds)
+peer_announce_interval = 120
+
+[cleaning]
+# Clean peers this often (seconds)
+torrent_cleaning_interval = 30
+# Clean connections this often (seconds)
+connection_cleaning_interval = 60
+# Remove peers that have not announced for this long (seconds)
+max_peer_age = 1800
+# Remove connections that haven\'t seen valid requests for this long (seconds)
+max_connection_idle = 180
+
+[privileges]
+# Chroot and switch group and user after binding to sockets
+drop_privileges = false
+# Chroot to this path
+chroot_path = "."
+# Group to switch to after chrooting
+group = "nogroup"
+# User to switch to after chrooting
+user = "nobody"
+
+# Access list configuration
+#
+# The file is read on start and when the program receives `SIGUSR1`. If
+# initial parsing fails, the program exits. Later failures result in in
+# emitting of an error-level log message, while successful updates of the
+# access list result in emitting of an info-level log message.
+[access_list]
+# Access list mode. Available modes are allow, deny and off.
+mode = "off"
+# Path to access list file consisting of newline-separated hex-encoded info hashes.
+#
+# If using chroot mode, path must be relative to new root.
+path = "./access-list.txt"
+
+[metrics]
+# Run a prometheus endpoint
+run_prometheus_endpoint = false
+# Address to run prometheus endpoint on
+prometheus_endpoint_address = "0.0.0.0:9000"
+# Update metrics for torrent count this often (seconds)
+torrent_count_update_interval = 10

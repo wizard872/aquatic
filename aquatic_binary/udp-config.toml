@@ -1,0 +1,133 @@
+# aquatic_udp configuration
+
+# Number of socket workers
+#
+# 0 = automatically set to number of available virtual CPUs
+socket_workers = 1
+# Log level. Available values are off, error, warn, info, debug and trace.
+log_level = "error"
+
+[network]
+# Use IPv4
+use_ipv4 = true
+# Use IPv6
+use_ipv6 = true
+# IPv4 address and port
+#
+# Examples:
+# - Use 0.0.0.0:3000 to bind to all interfaces on port 3000
+# - Use 127.0.0.1:3000 to bind to the loopback interface (localhost) on
+#   port 3000
+address_ipv4 = "0.0.0.0:3000"
+# IPv6 address and port
+#
+# Examples:
+# - Use [::]:3000 to bind to all interfaces on port 3000
+# - Use [::1]:3000 to bind to the loopback interface (localhost) on
+#   port 3000
+address_ipv6 = "[::]:3000"
+# Size of socket recv buffer. Use 0 for OS default.
+#
+# This setting can have a big impact on dropped packages. It might
+# require changing system defaults. Some examples of commands to set
+# values for different operating systems:
+#
+# macOS:
+# $ sudo sysctl net.inet.udp.recvspace=8000000
+#
+# Linux:
+# $ sudo sysctl -w net.core.rmem_max=8000000
+# $ sudo sysctl -w net.core.rmem_default=8000000
+socket_recv_buffer_size = 8000000
+# Poll timeout in milliseconds (mio backend only)
+poll_timeout_ms = 50
+# Store this many responses at most for retrying (once) on send failure
+# (mio backend only)
+#
+# Useful on operating systems that do not provide an udp send buffer,
+# such as FreeBSD. Setting the value to zero disables resending
+# functionality.
+resend_buffer_max_len = 0
+# Set flag on IPv6 socket to only accept IPv6 traffic.
+#
+# This should typically be set to true unless your OS does not support
+# double-stack sockets (that is, sockets that receive both IPv4 and IPv6
+# packets).
+set_only_ipv6 = true
+use_io_uring = true
+# Number of ring entries (io_uring backend only)
+#
+# Will be rounded to next power of two if not already one.
+ring_size = 128
+
+[protocol]
+# Maximum number of torrents to allow in scrape request
+max_scrape_torrents = 70
+# Maximum number of peers to return in announce response
+max_response_peers = 30
+# Ask peers to announce this often (seconds)
+peer_announce_interval = 900
+
+[statistics]
+# Collect and print/write statistics this often (seconds)
+interval = 5
+# Collect statistics on number of peers per torrent
+#
+# Will increase time taken for torrent cleaning.
+torrent_peer_histograms = false
+# Collect statistics on peer clients.
+#
+# Also, see `prometheus_peer_id_prefixes`.
+#
+# Expect a certain CPU hit (maybe 5% higher consumption) and a bit higher
+# memory use
+peer_clients = false
+# Print statistics to standard output
+print_to_stdout = false
+# Save statistics as HTML to a file
+write_html_to_file = false
+# Path to save HTML file to
+html_file_path = "tmp/statistics.html"
+# Run a prometheus endpoint
+run_prometheus_endpoint = false
+# Address to run prometheus endpoint on
+prometheus_endpoint_address = "0.0.0.0:9000"
+# Serve information on all peer id prefixes on the prometheus endpoint.
+#
+# Requires `peer_clients` to be activated.
+#
+# May consume quite a bit of CPU and RAM, since data on every single peer
+# client will be reported continuously on the endpoint
+prometheus_peer_id_prefixes = false
+
+[cleaning]
+# Clean torrents this often (seconds)
+torrent_cleaning_interval = 120
+# Allow clients to use a connection token for this long (seconds)
+max_connection_age = 120
+# Remove peers who have not announced for this long (seconds)
+max_peer_age = 1200
+
+[privileges]
+# Chroot and switch group and user after binding to sockets
+drop_privileges = false
+# Chroot to this path
+chroot_path = "."
+# Group to switch to after chrooting
+group = "nogroup"
+# User to switch to after chrooting
+user = "nobody"
+
+# Access list configuration
+#
+# The file is read on start and when the program receives `SIGUSR1`. If
+# initial parsing fails, the program exits. Later failures result in in
+# emitting of an error-level log message, while successful updates of the
+# access list result in emitting of an info-level log message.
+[access_list]
+# Access list mode. Available modes are allow, deny and off.
+mode = "off"
+# Path to access list file consisting of newline-separated hex-encoded info hashes.
+#
+# If using chroot mode, path must be relative to new root.
+path = "./access-list.txt"
