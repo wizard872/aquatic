@@ -3,7 +3,7 @@
 # Number of socket workers
 #
 # 0 = automatically set to number of available virtual CPUs
-socket_workers = 1
+socket_workers = 0
 # Log level. Available values are off, error, warn, info, debug and trace.
 log_level = "error"
 
@@ -11,21 +11,21 @@ log_level = "error"
 # Use IPv4
 use_ipv4 = true
 # Use IPv6
-use_ipv6 = true
+use_ipv6 = false
 # IPv4 address and port
 #
 # Examples:
 # - Use 0.0.0.0:3000 to bind to all interfaces on port 3000
 # - Use 127.0.0.1:3000 to bind to the loopback interface (localhost) on
 #   port 3000
-address_ipv4 = "0.0.0.0:3000"
+address_ipv4 = "0.0.0.0:8081"
 # IPv6 address and port
 #
 # Examples:
 # - Use [::]:3000 to bind to all interfaces on port 3000
 # - Use [::1]:3000 to bind to the loopback interface (localhost) on
 #   port 3000
-address_ipv6 = "[::]:3000"
+address_ipv6 = "[::]:8081"
 # Size of socket recv buffer. Use 0 for OS default.
 #
 # This setting can have a big impact on dropped packages. It might
@@ -62,11 +62,11 @@ ring_size = 128
 
 [protocol]
 # Maximum number of torrents to allow in scrape request
-max_scrape_torrents = 70
+max_scrape_torrents = 60
 # Maximum number of peers to return in announce response
 max_response_peers = 30
 # Ask peers to announce this often (seconds)
-peer_announce_interval = 900
+peer_announce_interval = 60
 
 [statistics]
 # Collect and print/write statistics this often (seconds)
@@ -85,9 +85,9 @@ peer_clients = false
 # Print statistics to standard output
 print_to_stdout = false
 # Save statistics as HTML to a file
-write_html_to_file = false
+write_html_to_file = true
 # Path to save HTML file to
-html_file_path = "tmp/statistics.html"
+html_file_path = "statistics/statistics.html"
 # Run a prometheus endpoint
 run_prometheus_endpoint = false
 # Address to run prometheus endpoint on
@@ -102,7 +102,7 @@ prometheus_peer_id_prefixes = false
 
 [cleaning]
 # Clean torrents this often (seconds)
-torrent_cleaning_interval = 120
+torrent_cleaning_interval = 60
 # Allow clients to use a connection token for this long (seconds)
 max_connection_age = 120
 # Remove peers who have not announced for this long (seconds)

@@ -5,7 +5,7 @@
 # Socket workers receive requests from the socket, parse them and send
 # them on to the swarm workers. They then receive responses from the
 # swarm workers, encode them and send them back over the socket.
-socket_workers = 1
+socket_workers = 4
 # Number of swarm workers. One is enough in almost all cases
 #
 # Swarm workers receive a number of requests from socket workers,
@@ -18,23 +18,23 @@ log_level = "warn"
 # Use IPv4
 use_ipv4 = true
 # Use IPv6
-use_ipv6 = true
+use_ipv6 = false
 # IPv4 address and port
 #
 # Examples:
 # - Use 0.0.0.0:3000 to bind to all interfaces on port 3000
 # - Use 127.0.0.1:3000 to bind to the loopback interface (localhost) on
 #   port 3000
-address_ipv4 = "0.0.0.0:3000"
+address_ipv4 = "0.0.0.0:5000"
 # IPv6 address and port
 #
 # Examples:
 # - Use [::]:3000 to bind to all interfaces on port 3000
 # - Use [::1]:3000 to bind to the loopback interface (localhost) on
 #   port 3000
-address_ipv6 = "[::]:3000"
+address_ipv6 = "[::]:5000"
 # Maximum number of pending TCP connections
-tcp_backlog = 1024
+tcp_backlog = 2048
 # Enable TLS
 #
 # The TLS files are read on start and when the program receives `SIGUSR1`.
@@ -82,7 +82,7 @@ max_scrape_torrents = 100
 # Maximum number of requested peers to accept in announce request
 max_peers = 50
 # Ask peers to announce this often (seconds)
-peer_announce_interval = 120
+peer_announce_interval = 60
 
 [cleaning]
 # Clean peers this often (seconds)

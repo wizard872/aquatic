@@ -12,7 +12,7 @@
 # Socket workers receive requests from the socket, parse them and send
 # them on to the swarm workers. They then receive responses from the
 # swarm workers, encode them and send them back over the socket.
-socket_workers = 1
+socket_workers = 4
 # Number of swarm workers.
 #
 # A single worker is recommended for servers with 1-7 physical cores.
@@ -41,11 +41,11 @@ log_level = "warn"
 # flag. Receiving both IPv4 and IPv6 traffic on loopback is currently
 # not supported. For other operating systems, please refer to their
 # respective documentation.
-address = "0.0.0.0:3000"
+address = "0.0.0.0:8081"
 # Only allow access over IPv6
 only_ipv6 = false
 # Maximum number of pending TCP connections
-tcp_backlog = 1024
+tcp_backlog = 2048
 # Enable TLS
 #
 # The TLS files are read on start and when the program receives `SIGUSR1`.
@@ -67,11 +67,11 @@ enable_http_health_checks = false
 
 [protocol]
 # Maximum number of torrents to accept in scrape request
-max_scrape_torrents = 255
+max_scrape_torrents = 150
 # Maximum number of offers to accept in announce request
 max_offers = 10
 # Ask peers to announce this often (seconds)
-peer_announce_interval = 120
+peer_announce_interval = 60
 
 [cleaning]
 # Clean peers this often (seconds)
