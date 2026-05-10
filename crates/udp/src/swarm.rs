@@ -356,14 +356,18 @@ impl<I: Ip> PeerMap<I> {
             port: request.port,
         };
 
-        // Create the response before inserting the peer. This means that we
-        // don't have to filter it out from the response peers, and that the
-        // reported number of seeders/leechers will not include it
+        // Create the response before inserting the peer so we don't have to
+        // filter it out from the response peers. Reported seeder/leecher
+        // counts are then adjusted to include the announcing peer based on
+        // its new status, so they reflect the full swarm count for the
+        // info_hash.
         let (response, opt_removed_peer) = match self {
             Self::Small(peer_map) => {
                 let opt_removed_peer = peer_map.remove(&peer_map_key);
 
                 let (seeders, leechers) = peer_map.num_seeders_leechers();
+                let (seeders, leechers) =
+                    adjust_counts_for_announcing_peer(seeders, leechers, status);
 
                 let response = AnnounceResponse {
                     fixed: AnnounceResponseFixedData {
@@ -390,6 +394,8 @@ impl<I: Ip> PeerMap<I> {
                 let opt_removed_peer = peer_map.remove_peer(&peer_map_key);
 
                 let (seeders, leechers) = peer_map.num_seeders_leechers();
+                let (seeders, leechers) =
+                    adjust_counts_for_announcing_peer(seeders, leechers, status);
 
                 let response = AnnounceResponse {
                     fixed: AnnounceResponseFixedData {
@@ -678,6 +684,22 @@ impl PeerStatus {
         } else {
             Self::Leeching
         }
+    }
+}
+
+/// Adjust raw seeder/leecher counts (which exclude the announcing peer because
+/// it was removed before counting) to include the announcing peer based on its
+/// new status, so the response reflects the full swarm count.
+#[inline]
+fn adjust_counts_for_announcing_peer(
+    seeders: usize,
+    leechers: usize,
+    status: PeerStatus,
+) -> (usize, usize) {
+    match status {
+        PeerStatus::Seeding => (seeders + 1, leechers),
+        PeerStatus::Leeching => (seeders, leechers + 1),
+        PeerStatus::Stopped => (seeders, leechers),
     }
 }
 

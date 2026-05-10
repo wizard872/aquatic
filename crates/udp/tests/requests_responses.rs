@@ -61,7 +61,16 @@ fn test_multiple_connect_announce_scrape() -> anyhow::Result<()> {
             }
         };
 
+        // Announce response peer list still excludes the announcing peer
         assert_eq!(announce_response.peers.len(), i.min(PEERS_WANTED));
+
+        // The announcing peer is now counted in the seeders/leechers totals,
+        // so count it before comparing.
+        if is_seeder {
+            num_seeders += 1;
+        } else {
+            num_leechers += 1;
+        }
 
         assert_eq!(announce_response.fixed.seeders.0.get(), num_seeders);
         assert_eq!(announce_response.fixed.leechers.0.get(), num_leechers);
@@ -75,13 +84,6 @@ fn test_multiple_connect_announce_scrape() -> anyhow::Result<()> {
             assert!(response_peer_ports.is_subset(&expected_peer_ports));
         } else {
             assert_eq!(response_peer_ports, expected_peer_ports);
-        }
-
-        // Do this after announce is evaluated, since it is expected not to include announcing peer
-        if is_seeder {
-            num_seeders += 1;
-        } else {
-            num_leechers += 1;
         }
 
         let scrape_response = scrape(
