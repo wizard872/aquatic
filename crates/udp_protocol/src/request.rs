@@ -54,7 +54,10 @@ impl Request {
             }
             // Announce
             1 => {
-                let request = AnnounceRequest::try_read_from_bytes(bytes)
+                // Use prefix variant so BEP 41 trailing options (e.g. URL Data
+                // sent by libtorrent/qBittorrent/Tixati) don't cause the
+                // fixed-size 98-byte announce header to be rejected.
+                let (request, _trailing) = AnnounceRequest::try_read_from_prefix(bytes)
                     .map_err(|_| RequestParseError::unsendable_text("invalid data"))?;
 
                 if request.port.0.get() == 0 {
@@ -365,6 +368,44 @@ mod tests {
                     let _ = Request::parse_bytes(&request_bytes, max_scrape_torrents);
                 }
             }
+        }
+    }
+
+    #[test]
+    fn test_announce_request_accepts_bep41_trailing_bytes() {
+        // Build a valid 98-byte announce, then append a BEP 41 URL Data option
+        // (option type 0x02, length 8, "/announce") as libtorrent/qBittorrent
+        // would when the tracker URL has a path component.
+        let request = AnnounceRequest {
+            connection_id: ConnectionId(I64::new(0x0102_0304_0506_0708)),
+            action_placeholder: AnnounceActionPlaceholder::default(),
+            transaction_id: TransactionId(I32::new(0x1122_3344)),
+            info_hash: InfoHash([0xAB; 20]),
+            peer_id: PeerId([0xCD; 20]),
+            bytes_downloaded: NumberOfBytes(I64::new(0)),
+            bytes_uploaded: NumberOfBytes(I64::new(0)),
+            bytes_left: NumberOfBytes(I64::new(1024)),
+            event: AnnounceEvent::Started,
+            ip_address: Ipv4AddrBytes([0, 0, 0, 0]),
+            key: PeerKey::new(0xDEAD_BEEFu32 as i32),
+            peers_wanted: NumberOfPeers(I32::new(50)),
+            port: Port::new(::std::num::NonZeroU16::new(6881).unwrap()),
+        };
+
+        let mut buf = Vec::new();
+        request.write_bytes(&mut buf).unwrap();
+        assert_eq!(buf.len(), 98);
+
+        // Append BEP 41 URL Data option: type=0x02, length=9, value="/announce"
+        buf.push(0x02);
+        buf.push(9);
+        buf.extend_from_slice(b"/announce");
+        // EndOfOptions marker
+        buf.push(0x00);
+
+        match Request::parse_bytes(&buf, u8::MAX).expect("should parse with trailing options") {
+            Request::Announce(parsed) => assert_eq!(parsed, request),
+            other => panic!("expected Announce, got {:?}", other),
         }
     }
 
