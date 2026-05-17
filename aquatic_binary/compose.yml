@@ -1,0 +1,59 @@
+
+services:
+  aquatic-udp:
+    image: registry.wizard87.com/public_container/aquatic:latest
+    container_name: aquatic-udp
+    command: ["udp", "-c", "/workspace/config/udp-config.toml"]
+    network_mode: host
+    #ports:
+    #  - "8081:8081/udp"
+    volumes:
+      - ./statistics:/workspace/statistics:rw
+      - ./config:/workspace/config
+    security_opt:
+      - seccomp=unconfined
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+
+
+  aquatic-http:
+    image: registry.wizard87.com/public_container/aquatic:latest
+    container_name: aquatic-http
+    command: ["http", "-c", "/workspace/config/http-config.toml"]
+    ports:
+      - "5000:5000/tcp"
+    volumes:
+      - ./config:/workspace/config
+    security_opt:
+      - seccomp=unconfined
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+
+
+  aquatic-ws:
+    image: registry.wizard87.com/public_container/aquatic:latest
+    container_name: aquatic-ws
+    command: ["ws", "-c", "/workspace/config/ws-config.toml"]
+    ports:
+      - "8081:8081/tcp"
+    volumes:
+      - ./config:/workspace/config
+    security_opt:
+      - seccomp=unconfined
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+
+#networks:
+#  default:
+#    external: false
+#    name: main_network
+
