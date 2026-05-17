@@ -745,7 +745,7 @@ impl RawBufRing {
 
         let res = CurrentRing::with(|ring| unsafe {
             ring.submitter()
-                .register_buf_ring(self.ring_addr as _, self.ring_entries(), bgid)
+                .register_buf_ring_with_flags(self.ring_addr as _, self.ring_entries(), bgid, 0)
         });
         // println!("{}:{}: res {:?}", file!(), line!(), res);
 
